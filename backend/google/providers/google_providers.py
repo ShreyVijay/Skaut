@@ -123,6 +123,21 @@ class GoogleGeocodingProvider(GeocodingProvider):
 
 
 class GoogleGeminiProvider(LLMProvider):
+
+    def generate_text(self, prompt: str) -> str:
+        try:
+            client = GoogleClientSingleton.get_genai_client()
+
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+            )
+
+            return response.text
+
+        except Exception as e:
+            return f"Unable to generate response: {str(e)}"
+
     def generate_explanation(self, recommendation: dict, reasoning: dict, audit: dict) -> ExplanationDTO:
         prompt = f"""
         You are a travel agent assistant for skaut.
@@ -133,12 +148,14 @@ class GoogleGeminiProvider(LLMProvider):
         try:
             client = GoogleClientSingleton.get_genai_client()
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model="gemini-2.5-flash",
                 contents=prompt,
             )
             return ExplanationDTO(explanation=response.text)
-        except Exception as e:
-            return ExplanationDTO(explanation="Unable to generate explanation at this time.")
+        except Exception:
+            return ExplanationDTO(
+                explanation="Unable to generate explanation at this time."
+            )
 
     def generate_travel_narrative(self, route_data: dict, recommendation: dict) -> ExplanationDTO:
         prompt = f"""
@@ -150,9 +167,11 @@ class GoogleGeminiProvider(LLMProvider):
         try:
             client = GoogleClientSingleton.get_genai_client()
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model="gemini-2.5-flash",
                 contents=prompt,
             )
             return ExplanationDTO(explanation=response.text)
         except Exception:
-            return ExplanationDTO(explanation="Unable to generate travel narrative at this time.")
+            return ExplanationDTO(
+                explanation="Unable to generate travel narrative at this time."
+            )
