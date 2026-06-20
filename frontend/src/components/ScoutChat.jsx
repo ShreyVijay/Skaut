@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Drawer } from 'vaul';
 import { sendScoutChat } from '../services/api';
 import { useSession } from '../store/useSession';
@@ -24,10 +24,23 @@ export default function ScoutChat({ open, onOpen, onClose }) {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const conversationId = useRef(crypto.randomUUID());
 
-  async function sendMessage(text = input) {
+  async function sendMessage(text = input, isSuggestedPrompt = false) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
+
+    const promptMessageId = crypto.randomUUID();
+
+    if (typeof window !== 'undefined' && window.pendo) {
+      window.pendo.trackAgent("prompt", {
+        agentId: "DLgM5Z5FdgAKygvHFQ2IH1_kge4",
+        conversationId: conversationId.current,
+        messageId: promptMessageId,
+        content: trimmed,
+        suggestedPrompt: isSuggestedPrompt,
+      });
+    }
 
     const nextMessages = [...messages, { role: 'user', text: trimmed }];
     setMessages(nextMessages);
@@ -44,10 +57,19 @@ export default function ScoutChat({ open, onOpen, onClose }) {
           user_name: name,
         },
       });
-      setMessages([
-        ...nextMessages,
-        { role: 'assistant', text: response.reply || 'I checked the current skaut context.' },
-      ]);
+      const replyText = response.reply || 'I checked the current skaut context.';
+
+      if (typeof window !== 'undefined' && window.pendo) {
+        window.pendo.trackAgent("agent_response", {
+          agentId: "DLgM5Z5FdgAKygvHFQ2IH1_kge4",
+          conversationId: conversationId.current,
+          messageId: crypto.randomUUID(),
+          content: replyText,
+          modelUsed: "gemini-2.5-flash",
+        });
+      }
+
+      setMessages([...nextMessages, { role: 'assistant', text: replyText }]);
     } catch (error) {
       setMessages([
         ...nextMessages,
@@ -93,7 +115,7 @@ export default function ScoutChat({ open, onOpen, onClose }) {
 
             <div className="chat-prompts">
               {starterPrompts.map((prompt) => (
-                <button key={prompt} type="button" onClick={() => sendMessage(prompt)}>
+                <button key={prompt} type="button" onClick={() => sendMessage(prompt, true)}>
                   {prompt}
                 </button>
               ))}
