@@ -48,6 +48,17 @@ export default function ScoutChat({ open, onOpen, onClose }) {
         ...nextMessages,
         { role: 'assistant', text: response.reply || 'I checked the current skaut context.' },
       ]);
+
+      const savedRecs = JSON.parse(localStorage.getItem('saved_recommendations') || '[]');
+      pendo.track("scout_chat_message_sent", {
+        message_length: trimmed.length,
+        surface: window.location.pathname,
+        is_starter_prompt: starterPrompts.includes(trimmed),
+        language: language,
+        response_action: response.action || "reply",
+        saved_recommendations_count: savedRecs.length,
+        conversation_length: nextMessages.length + 1,
+      });
     } catch (error) {
       setMessages([
         ...nextMessages,
