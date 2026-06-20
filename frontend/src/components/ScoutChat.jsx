@@ -32,9 +32,9 @@ export default function ScoutChat({ open, onOpen, onClose }) {
 
     const promptMessageId = crypto.randomUUID();
 
-    if (window.pendo?.trackAgent) {
+    if (typeof window !== 'undefined' && window.pendo) {
       window.pendo.trackAgent("prompt", {
-        agentId: "20HJk7WBgXpodv4t3wqp_EpaQ-E",
+        agentId: "DLgM5Z5FdgAKygvHFQ2IH1_kge4",
         conversationId: conversationId.current,
         messageId: promptMessageId,
         content: trimmed,
@@ -59,9 +59,9 @@ export default function ScoutChat({ open, onOpen, onClose }) {
       });
       const replyText = response.reply || 'I checked the current skaut context.';
 
-      if (window.pendo?.trackAgent) {
+      if (typeof window !== 'undefined' && window.pendo) {
         window.pendo.trackAgent("agent_response", {
-          agentId: "20HJk7WBgXpodv4t3wqp_EpaQ-E",
+          agentId: "DLgM5Z5FdgAKygvHFQ2IH1_kge4",
           conversationId: conversationId.current,
           messageId: crypto.randomUUID(),
           content: replyText,
