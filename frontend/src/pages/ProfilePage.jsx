@@ -15,7 +15,6 @@ export default function ProfilePage() {
 
   const handleClearSession = () => {
     if (window.confirm('Are you sure you want to clear your local session and restart onboarding?')) {
-      pendo.clearSession();
       session.clearSession();
       navigate('/onboarding', { replace: true });
     }

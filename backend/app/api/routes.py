@@ -370,6 +370,7 @@ def get_all_missions_endpoint(email: str = None):
 @router.post("/chat")
 def chat_endpoint(request: ChatRequest):
     message = request.message.strip()
+
     if not message:
         raise HTTPException(status_code=400, detail="Message is required")
 
@@ -377,9 +378,13 @@ def chat_endpoint(request: ChatRequest):
     surface = request.context.get("surface", "skaut")
     saved_count = len(request.context.get("saved_recommendations", []))
 
-    import os
+    blocked_terms = [
+        "visa fraud",
+        "fake ticket",
+        "bypass security",
+        "evade police",
+    ]
 
-    blocked_terms = ["visa fraud", "fake ticket", "bypass security", "evade police"]
     if any(term in lower_message for term in blocked_terms):
         return {
             "reply": "I can help with safe travel, verified tickets, budgets, and route replanning, but I cannot assist with unsafe or illegal actions.",
@@ -389,41 +394,53 @@ def chat_endpoint(request: ChatRequest):
                 "saved_recommendations": saved_count,
             },
         }
-    
-    # Check if Gemini API key exists
-    gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-    if not gemini_key:
-        return {"reply": "Gemini API key is not configured.", "action": "explain_context", "context_used": {}}
-        
-    try:
-        from google import genai
-        client = genai.Client(api_key=gemini_key)
-    except Exception:
-        client = None
-    
-    system_prompt = f"""You are skaut, an intelligent travel agent for the FIFA 2026 World Cup.
+
+    system_prompt = f"""
+You are skaut, an intelligent travel agent for the FIFA 2026 World Cup.
+
 The 2026 World Cup features 48 teams, 104 matches, and a new Round of 32 format where top 2 + 8 best third-place teams advance.
+
 Current surface: {surface}
 Saved recommendations: {saved_count}
-Answer briefly and proactively help them plan their World Cup travel. Recommending actions like 'open_replanning' or 'review_budget' is highly encouraged if relevant."""
 
-    if client:
-        try:
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=system_prompt + "\n\nUser: " + message,
-            )
-            reply = response.text
-        except Exception as e:
-            reply = f"skaut AI could not reach Gemini right now. I can still route you through the built-in mission, map, budget, and replanning tools. Detail: {str(e)}"
-    else:
-        reply = "Gemini is not available in this backend environment yet. skaut can still help with mission maps, budget review, and replanning from the app data."
-        
+Answer briefly and proactively help users plan World Cup travel.
+
+You may:
+- explain routes
+- explain cities
+- explain stadiums
+- explain budgets
+- explain replanning decisions
+
+You must not:
+- generate recommendation scores
+- override Scout recommendations
+- invent tournament results
+"""
+
+    try:
+        from google.services.gemini_explanation_service import GeminiExplanationService
+
+        gemini_service = GeminiExplanationService()
+
+        reply = gemini_service.generate(
+            prompt=f"{system_prompt}\n\nUser: {message}"
+        )
+
+    except Exception as e:
+        reply = (
+            "Scout AI is temporarily unavailable. "
+            f"Reason: {str(e)}"
+        )
+
     action = "explain_context"
+
     if "replan" in lower_message or "route" in lower_message:
         action = "open_replanning"
+
     elif "budget" in lower_message or "cost" in lower_message:
         action = "review_budget"
+
     elif "city" in lower_message or "stadium" in lower_message:
         action = "open_city_intelligence"
 

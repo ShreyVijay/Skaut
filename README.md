@@ -1,281 +1,84 @@
-# ⚽ SKAUT
+# ⚽ SKAUT: Adaptive Tournament Intelligence Platform
 
-### Adaptive Tournament Intelligence Platform
-
-**Mission In. Intelligence Out.**
-
-Skaut is an AI-powered tournament intelligence platform that helps fans follow their team through uncertain tournaments such as the FIFA World Cup.
-
-Unlike traditional travel planners that assume certainty, Skaut continuously monitors tournament developments, understands fan goals and constraints, and automatically replans missions when reality changes.
-
-Built for the **Google Cloud Rapid Agent Hackathon 2026**.
+> **Mission In. Intelligence Out.**
+>
+> Skaut is an AI-powered tournament intelligence platform that helps fans follow their team through uncertain tournaments such as the FIFA World Cup 2026.
+>
+> Built for the **Google Cloud Rapid Agent Hackathon 2026**.
 
 ---
 
-# 🚀 The Problem
+## 🚀 The Problem & Our Solution
 
-The FIFA World Cup is unpredictable.
+### The Problem
+The FIFA World Cup is unpredictable. Teams advance, match venues change, ticket and travel costs spike, and hotel rooms vanish overnight. Traditional travel planning tools assume absolute certainty and force fans to manually rebuild itineraries from scratch when disruptions occur.
 
-A team advances.
-
-A match changes cities.
-
-Travel costs change.
-
-Hotels disappear.
-
-Routes become invalid.
-
-Traditional travel tools force users to start over.
-
-Fans don't need another booking website.
-
-They need an intelligent system that adapts with the tournament.
+### Our Solution
+Skaut treats travel planning as a **living mission**. The user defines their team, budget, travel style, and preferences. Skaut then:
+1. Monitors tournament developments.
+2. Tracks live mission states.
+3. Automatically detects disruptive events (e.g., team advancement or rescheduling).
+4. Re-evaluates travel, lodging, and match options.
+5. Generates deterministic, budget-constrained recommendations.
+6. Explains every recommendation with a clear audit trail.
 
 ---
 
-# 💡 Our Solution
+## 🏗️ System Architecture
 
-Skaut treats travel planning as a living mission.
-
-Users define:
-
-* Team
-* Budget
-* Travel Style
-* Preferences
-
-Skaut then:
-
-* Monitors tournament developments
-* Tracks mission state
-* Detects impactful events
-* Re-evaluates travel options
-* Generates recommendations
-* Explains every decision
-* Adapts automatically
-
----
-
-# 🏆 Why It Matters
-
-The 2026 FIFA World Cup will include:
-
-* 48 Teams
-* 104 Matches
-* 16 Host Cities
-* Millions of Traveling Fans
-
-Every advancement creates cascading travel challenges.
-
-Skaut transforms those disruptions into actionable intelligence.
-
----
-
-# 🎯 Key Features
-
-## Adaptive Mission Planning
-
-Create missions instead of static trips.
-
-```text
-Egypt Fan
-↓
-Budget: $3000
-↓
-Travel Style: Balanced
-↓
-Follow Team Through Tournament
-```
-
-As tournament conditions change, Skaut automatically adapts.
-
----
-
-## Tournament Intelligence
-
-Continuously tracks:
-
-* Team advancement
-* Match changes
-* Venue changes
-* Tournament progression
-
----
-
-## Budget Intelligence
-
-Evaluates:
-
-* Travel burden
-* Hotel affordability
-* Destination costs
-* Budget risk
-
-Every recommendation is constrained by real user budgets.
-
----
-
-## Recommendation Engine
-
-Deterministic recommendation pipeline:
-
-```text
-Mission
-↓
-Semantic Retrieval
-↓
-Candidate Enrichment
-↓
-Preference Scoring
-↓
-Budget Analysis
-↓
-Decision Engine
-↓
-Recommendation
-```
-
----
-
-## Explainable AI
-
-Every recommendation includes:
-
-* Reasoning
-* Audit trail
-* Score contributions
-* Budget impact
-
-Users understand exactly why a recommendation was made.
-
----
-
-## Travel Intelligence
-
-Powered by Google Maps Platform.
-
-Provides:
-
-* Routes
-* Distances
-* Travel Time
-* Hotels
-* Restaurants
-* Attractions
-* Stadium Locations
-
----
-
-# 🏗️ System Architecture
+Scout uses a decoupled service-oriented architecture where the FastAPI gateway routes requests to backend services, while Elasticsearch acts as the primary search and vector storage engine.
 
 ```mermaid
 flowchart TD
+    USER[Fan] --> FRONTEND[React Frontend]
+    FRONTEND --> API[FastAPI Gateway]
 
-    USER[Fan]
-
-    USER --> FRONTEND
-
-    subgraph FRONTEND[React Frontend]
-        D[Dashboard]
-        M[Mission Builder]
-        R[Recommendation Center]
-        T[Travel Center]
-        S[Settings]
+    subgraph API [FastAPI Gateway]
+        GW[Request Routing & Auth]
     end
 
-    FRONTEND --> API
+    API --> SERVICES[Scout Services]
 
-    subgraph API[FastAPI Gateway]
-        GW[Request Routing]
-    end
-
-    API --> SERVICES
-
-    subgraph SERVICES[Scout Services]
-
+    subgraph SERVICES [Scout Services]
         MS[Mission Service]
-
         TI[Tournament Intelligence]
-
         CI[City Intelligence]
-
         SI[Stadium Intelligence]
-
         BE[Budget Engine]
-
         PE[Preference Engine]
-
         RE[Recommendation Engine]
-
         RP[Replanning Engine]
-
         RA[Reasoning & Audit Engine]
-
     end
 
-    SERVICES --> ES
-    SERVICES --> MCP
-    SERVICES --> GOOGLE
+    SERVICES --> ES[(Elasticsearch)]
+    SERVICES --> MONGO[(MongoDB)]
+    SERVICES --> GOOGLE[Google Cloud / APIs]
 
-    subgraph ES[Elasticsearch]
-
-        MISSIONS[Missions]
-
-        EVENTS[Events]
-
-        CITIES[Cities]
-
-        STADIUMS[Stadiums]
-
-        PREFS[Preferences]
-
-        RECS[Recommendations]
-
-        AUDITS[Audit Records]
-
-        MEMORY[Agent Memory]
-
+    subgraph ES [Elasticsearch Indices]
+        MISSIONS[missions]
+        EVENTS[events]
+        CITIES[cities]
+        STADIUMS[stadiums]
+        PREFS[preferences]
+        RECS[recommendations]
+        AUDITS[audits]
+        MEMORY[agent_memory]
     end
 
-    subgraph MCP[MCP Layer]
-
-        GETMISSION[get_mission]
-
-        GETBUDGET[get_budget]
-
-        GETREC[get_recommendation]
-
-        GETREASON[get_reasoning]
-
-        GETAUDIT[get_audit]
-
+    subgraph MONGO [MongoDB Collections]
+        USERS[users]
+        SESSIONS[sessions]
+        SAVED[saved_missions]
     end
 
-    subgraph GOOGLE[Google Cloud]
-
+    subgraph GOOGLE [Google Cloud / APIs]
         AGENT[Agent Builder]
-
-        GEMINI[Gemini]
-
+        GEMINI[Gemini 2.5 Flash]
         MAPS[Maps API]
-
         PLACES[Places API]
-
         GEO[Geocoding API]
-
         DIR[Directions API]
-
-    end
-
-    subgraph MONGO[MongoDB]
-
-        USERS[Users]
-
-        SESSIONS[Sessions]
-
-        SAVED[Saved Missions]
-
     end
 
     FRONTEND --> MONGO
@@ -283,281 +86,267 @@ flowchart TD
 
 ---
 
-# 🤖 Agent Architecture
+## 🤖 Agent & MCP Architecture
 
-Google Cloud Agent Builder orchestrates workflows.
-
-Agent Builder never owns business logic.
-
-Scout owns all intelligence.
-
-```mermaid
-flowchart LR
-
-    AgentBuilder[Google Agent Builder]
-
-    AgentBuilder --> MCP
-
-    MCP --> ScoutServices
-
-    ScoutServices --> Elasticsearch
-
-    Elasticsearch --> ScoutServices
-
-    ScoutServices --> MCP
-
-    MCP --> AgentBuilder
-```
-
----
-
-# 🔍 MCP Tool Catalog
-
-| Tool                 | Purpose              |
-| -------------------- | -------------------- |
-| get_mission          | Retrieve mission     |
-| get_mission_history  | Mission timeline     |
-| search_cities        | Semantic city search |
-| get_city             | City intelligence    |
-| search_stadiums      | Stadium retrieval    |
-| get_stadium          | Stadium intelligence |
-| get_budget           | Budget analysis      |
-| get_preferences      | User preferences     |
-| get_team_status      | Team state           |
-| get_tournament_state | Tournament state     |
-| get_recommendation   | Recommendation       |
-| get_reasoning        | Explanation          |
-| get_audit            | Audit trail          |
-
----
-
-# 🧠 Recommendation Pipeline
-
-```mermaid
-flowchart LR
-
-Mission
-
---> Retrieval
-
---> Enrichment
-
---> Scoring
-
---> Decision
-
---> Reasoning
-
---> Audit
-
---> Recommendation
-```
-
----
-
-# 🗺️ Google Cloud Integration
-
-## Agent Builder
-
-Orchestrates multi-step workflows.
-
-## Gemini
-
-Generates:
-
-* Explanations
-* Summaries
-* Narratives
-
-## Google Maps Platform
-
-Provides:
-
-* Maps
-* Places
-* Directions
-* Geocoding
-
----
-
-# 📊 Data Architecture
-
-## Elasticsearch (Source of Truth)
-
-Stores:
-
-* Missions
-* Events
-* Cities
-* Stadiums
-* Preferences
-* Recommendations
-* Audit Records
-* Agent Memory
-
-## MongoDB
-
-Stores only:
-
-* Users
-* Sessions
-* Saved Missions
-
----
-
-# 🔒 Design Principles
-
-### Deterministic Recommendations
-
-Recommendations are generated by Scout.
-
-Not by Gemini.
-
-Not by Agent Builder.
-
----
-
-### Explainable Decisions
-
-Every recommendation can be traced back to:
-
-* Inputs
-* Scores
-* Constraints
-* Audit Records
-
----
-
-### Adaptive Planning
-
-Tournament changes trigger:
+Google Cloud Agent Builder orchestrates workflows. Agent Builder accesses the underlying Scout database and services through the Model Context Protocol (MCP) layer.
 
 ```text
-Event
-↓
-Detection
-↓
-Mission Retrieval
-↓
-Replanning
-↓
-New Recommendation
+Elastic Agent Builder
+        │
+        ▼
+FastMCP Server / Tool Registry (backend/app/mcp/server.py)
+        │
+        ▼
+MCP Read-Only Tools (backend/app/mcp/tools/*)
+        │
+        ▼
+Typed Scout Service Facades
+        │
+        ▼
+Existing Scout Services ──► Elasticsearch & MongoDB
 ```
 
-Automatically.
+### Core Architecture Principles
+* **Separation of Concerns:** Agent Builder manages workflow coordination and memory but holds zero business logic. Scout owns all tournament, preference, budget, and recommendation intelligence.
+* **Read-Only Tools:** All MCP tools exposed to Agent Builder are read-only. Chat history and session tokens are never saved to the agent's memory.
+* **Deterministic Fallbacks:** If the Agent Builder runtime fails, the application automatically falls back to built-in frontend/backend routes.
 
 ---
 
-# ☁️ Deployment
+## 🔍 MCP Tool Catalog
 
-Frontend
+Scout exposes 12 read-only tools to the Agent Builder via the Model Context Protocol:
 
-* React
-* Cloud Run
-
-Backend
-
-* FastAPI
-* Cloud Run
-
-Infrastructure
-
-* Google Cloud
-* Secret Manager
-* Artifact Registry
-
-Search & Intelligence
-
-* Elasticsearch
-
-Identity
-
-* MongoDB
+| Tool | Service Boundary | Output Description |
+|---|---|---|
+| `get_mission(team)` | `mission_service` | Retrieves the latest active mission for a team. |
+| `get_mission_history(team, size)` | `mission_service` | Lists historical changes to the team's mission. |
+| `search_cities(query, size)` | `city_service` | Performs vector search over candidate cities. |
+| `get_city(city)` | `city_service` | Retrieves detailed metadata and coordinates for a city. |
+| `search_stadiums(query, size)` | `stadium_service` | Performs fuzzy multi-match over tournament stadiums. |
+| `get_stadium(stadium)` | `stadium_service` | Retrieves details for a specific tournament stadium. |
+| `get_budget(team)` | `budget_service` | Evaluates current expenditures and budget status. |
+| `get_team_status(team)` | `tournament_service` | Returns the team's standing and tournament progress. |
+| `get_tournament_state(team)` | `tournament_service` | Retrieves overall match layouts and upcoming games. |
+| `get_recommendation(team)` | `recommendation_service` | Returns current travel/match recommendation data. |
+| `get_reasoning(team)` | `reasoning_service` | Provides Gemini-generated plain text explanation. |
+| `get_audit(team)` | `audit_service` | Returns the underlying scoring audit records. |
 
 ---
 
-# 🏅 Hackathon Alignment
+## 🧠 Recommendation & Audit Pipeline
 
-## Technological Implementation
-
-✓ Google Cloud Agent Builder
-
-✓ Gemini
-
-✓ MCP Architecture
-
-✓ Elasticsearch Vector Search
-
-✓ Google Maps Platform
-
-✓ Cloud Run Deployment
-
----
-
-## Design
-
-✓ Mission-Oriented UX
-
-✓ Explainable AI
-
-✓ Transparent Recommendations
-
-✓ Adaptive Planning
-
----
-
-## Potential Impact
-
-✓ Millions of World Cup Fans
-
-✓ Real Tournament Use Cases
-
-✓ Autonomous Replanning
-
-✓ Scalable Architecture
-
----
-
-## Quality of Idea
-
-✓ Solves a Real Problem
-
-✓ Beyond Traditional Travel Apps
-
-✓ Beyond Chatbots
-
-✓ Agent-Driven Decision Making
-
----
-
-# 🎬 Demo Flow
+Scout guarantees transparency. Recommendations are not hallucinated by LLMs; they are computed deterministically, scored against fan preferences, and analyzed for budget compatibility.
 
 ```text
-Mission Creation
-↓
-Tournament Event
-↓
-Automatic Replanning
-↓
-Recommendation Generation
-↓
-Reasoning
-↓
-Travel Intelligence
-↓
-Mission Updated
+Mission Data
+    │
+    ▼
+Semantic Retrieval (Retrieve cities, stadiums, and alternative routes)
+    │
+    ▼
+Candidate Enrichment (Inject travel costs, flight times, and hotel availability)
+    │
+    ▼
+Preference Scoring (Compute weighted scores for transport, atmosphere, and cost)
+    │
+    ▼
+Budget Analysis (Filter out options violating absolute cost constraints)
+    │
+    ▼
+Decision Engine (Sort and select the optimal travel recommendation)
+    │
+    ▼
+Reasoning Service (Send the structured audit trail to Gemini for narrative generation)
+    │
+    ▼
+Final Recommendation (Presented to user with a complete, traceable score breakdown)
 ```
 
 ---
 
-# 👥 Team
+## 🗺️ Travel Intelligence Layer
 
-Built for the Google Cloud Rapid Agent Hackathon 2026.
+Scout uses abstract provider models to query flights, hotels, ground transport, and match tickets. This decouples the core recommendation engine from third-party vendor lock-in.
+
+```text
+                  ┌───────────────────────┐
+                  │ Travel Service Facade │
+                  └───────────┬───────────┘
+                              │
+                    ┌─────────┴─────────┐
+                    ▼                   ▼
+          ┌───────────────────┐ ┌───────────────┐
+          │ TravelProvider Ab │ │ Maps/Places Ab│
+          └─────────┬─────────┘ └───────┬───────┘
+                    │                   │
+         ┌──────────┼──────────┐        ├── Geocoding API
+         ▼          ▼          ▼        ├── Directions API
+      [Amadeus] [Skyscanner]  [Mock]    └── Places API
+```
+
+* **Flights:** Interfaces with Amadeus (schedules, prices) and Skyscanner (deep-links).
+* **Ground Transport:** Ready for FlixBus (bus routing) and Busbud (carrier aggregation).
+* **Hotels:** Unified interface to search Booking.com and Expedia Rapid APIs.
+* **Ticketing:** Integration templates for Ticketmaster and StubHub.
 
 ---
 
-# ⚡ Tagline
+## 🔒 Security & Authentication Architecture
 
-Mission In.
+Scout's future security design relies on modern, stateless sessions:
+* **Google OAuth 2.0:** Single-page React client login using Authorization Code Flow with PKCE.
+* **Email + Password:** Traditional login using `bcrypt` (salt rounds = 12) for secure password hashing.
+* **Magic Link:** Passwordless authentication using single-use, high-entropy tokens valid for 15 minutes.
+* **Token Storage:** Stateless JSON Web Tokens (JWT) stored in HTTP-Only, SameSite=Lax, Secure cookies, preventing cross-site scripting (XSS) theft.
 
-Intelligence Out.
+---
+
+## 📊 Data Architecture
+
+### Elasticsearch (Source of Truth)
+Holds all search indices, travel data, preferences, and agent memory.
+* **Missions Index:** Tracks team, budget, style, and active step.
+* **Agent Memory Index:** Store summary-only memory records (`mission_summary`, `recommendation_summary`, `reasoning_summary`). Secrets and user sessions are never saved.
+
+### MongoDB
+Used strictly for light relational storage:
+* **Users:** User profiles, credential records.
+* **Sessions:** Active UI sessions.
+* **Saved Missions:** Historical snapshots saved by the user.
+
+---
+
+## 🛠️ Local Installation & Configuration Setup
+
+### Prerequisites
+* **Python 3.11+**
+* **Node.js 18+**
+* **Elasticsearch 8.x** (Local or Elastic Cloud)
+* **MongoDB 6.0+**
+
+### 1. Clone & Set Up Environments
+Create `.env` files in both directories using templates.
+
+```bash
+# Backend Setup
+cd backend
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 2. Configure Environment Variables
+
+#### Backend Environment (`backend/.env`)
+```ini
+# Core Configuration
+PORT=8000
+HOST=0.0.0.0
+CORS_ORIGINS=http://localhost:5173
+
+# Elasticsearch Configuration
+ELASTIC_CLOUD_ID=your-elastic-cloud-id
+ELASTIC_USERNAME=elastic
+ELASTIC_PASSWORD=your-elastic-password
+
+# MongoDB Configuration
+MONGODB_URI=mongodb://localhost:27017/scout
+
+# Google Cloud Integrations
+GEMINI_API_KEY=your-gemini-api-key
+GOOGLE_MAPS_API_KEY=your-google-maps-api-key
+```
+
+#### Frontend Environment (`frontend/.env`)
+```ini
+VITE_API_BASE_URL=http://localhost:8000
+VITE_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
+```
+
+---
+
+## 🚀 Running the Application
+
+### 1. Ingest Initial Data
+Populate Elasticsearch with host cities, stadiums, and tournament templates:
+```bash
+cd backend
+# Run database indexes and data load scripts
+python -m app.services.create_indices
+python -m app.services.load_cities
+python -m app.services.load_stadiums
+python -m app.services.load_matches
+python -m app.services.load_alternatives
+python -m app.services.create_agent_memory_index
+```
+
+### 2. Run the Backend Server
+```bash
+python main.py
+```
+* **FastAPI Docs:** `http://localhost:8000/docs`
+* **MCP Health Endpoint:** `http://localhost:8000/health/mcp`
+
+### 3. Run the Frontend Server
+```bash
+cd frontend
+npm install
+npm run dev
+```
+* **Frontend UI:** `http://localhost:5173`
+
+---
+
+## ☁️ Production Deployment (Cloud Run)
+
+### Backend Deployment
+Deploy the FastAPI backend to Google Cloud Run:
+```bash
+cd backend
+# Build image using Docker
+docker build -t gcr.io/your-project-id/scout-backend .
+docker push gcr.io/your-project-id/scout-backend
+# Deploy to Cloud Run
+gcloud run deploy scout-backend \
+  --image gcr.io/your-project-id/scout-backend \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated
+```
+
+### Frontend Deployment
+Deploy the Vite frontend static container (served via Nginx):
+```bash
+cd frontend
+# Build image
+docker build -t gcr.io/your-project-id/scout-frontend .
+docker push gcr.io/your-project-id/scout-frontend
+# Deploy to Cloud Run
+gcloud run deploy scout-frontend \
+  --image gcr.io/your-project-id/scout-frontend \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated
+```
+
+---
+
+## 🧪 Verification & Health Checks
+
+Verify that all systems are operational with these diagnostic endpoints:
+
+```bash
+# Check FastAPI API status
+curl http://localhost:8000/health
+
+# Check Datastore connectivity (Elasticsearch + MongoDB)
+curl http://localhost:8000/readiness
+
+# Check registered MCP Tools listing
+curl http://localhost:8000/health/mcp
+```
+
+Validate the code builds cleanly:
+* **Backend compilation test:** `python -m compileall -q backend`
+* **Frontend Vite build test:** `cd frontend && npm run build`
