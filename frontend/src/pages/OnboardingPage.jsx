@@ -59,6 +59,14 @@ export default function OnboardingPage() {
       }
     });
 
+    pendo.track('onboarding_completed', {
+      atmosphere_weight: atmosphere / 100,
+      budget_weight: budget / 100,
+      transport_weight: transport / 100,
+      language: useSession.getState().language,
+      theme: useSession.getState().theme,
+    });
+
     navigate('/dashboard', { replace: true });
   };
 

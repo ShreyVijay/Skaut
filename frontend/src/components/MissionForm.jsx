@@ -38,6 +38,14 @@ export default function MissionForm() {
 
       const result = await createMission(payload);
       const team = result.team || form.team;
+
+      pendo.track('mission_created', {
+        team: team,
+        budget: parseInt(form.budget, 10),
+        travel_style: form.travel_style,
+        objective: form.objective,
+      });
+
       navigate(`/mission/${encodeURIComponent(team)}`);
     } catch (err) {
       setError(

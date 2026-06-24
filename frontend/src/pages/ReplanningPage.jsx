@@ -99,11 +99,31 @@ export default function ReplanningPage() {
         const busRes = await getTravelBuses(startCity, recCity);
         const ticketRes = await getTravelTickets(matchName);
 
+        const travelFlights = flightRes.flights || [];
+        const travelHotels = hotelRes.hotels || [];
+        const travelBuses = busRes.buses || [];
+        const travelTickets = ticketRes.tickets || [];
+
         setTravelOptions({
-          flights: flightRes.flights || [],
-          hotels: hotelRes.hotels || [],
-          buses: busRes.buses || [],
-          tickets: ticketRes.tickets || [],
+          flights: travelFlights,
+          hotels: travelHotels,
+          buses: travelBuses,
+          tickets: travelTickets,
+        });
+
+        pendo.track('replanning_generated', {
+          team,
+          recommended_city: recCity,
+          recommended_match: matchName,
+          final_score: data.recommendation?.final_score,
+          raw_score: data.recommendation?.raw_score,
+          candidate_source: data.recommendation?.candidate_source,
+          rank: data.recommendation?.rank,
+          flights_count: travelFlights.length,
+          hotels_count: travelHotels.length,
+          buses_count: travelBuses.length,
+          tickets_count: travelTickets.length,
+          start_city: startCity,
         });
       }
     } catch (err) {
@@ -136,6 +156,16 @@ export default function ReplanningPage() {
         saved.push(newRec);
         localStorage.setItem('saved_recommendations', JSON.stringify(saved));
       }
+
+      pendo.track('recommendation_saved', {
+        team,
+        city: result.recommendation.city,
+        match: result.recommendation.match,
+        final_score: result.recommendation.final_score,
+        candidate_source: result.recommendation.candidate_source,
+        saved_recommendations_count: saved.length,
+      });
+
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);
     } catch (err) {

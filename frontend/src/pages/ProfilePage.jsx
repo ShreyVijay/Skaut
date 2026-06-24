@@ -15,6 +15,14 @@ export default function ProfilePage() {
 
   const handleClearSession = () => {
     if (window.confirm('Are you sure you want to clear your local session and restart onboarding?')) {
+      const savedRecs = JSON.parse(localStorage.getItem('saved_recommendations') || '[]');
+
+      pendo.track('session_cleared', {
+        had_active_mission: savedRecs.some((r) => !!r.team),
+        saved_recommendations_count: savedRecs.length,
+        wallet_balance: useWallet.getState().balance,
+      });
+
       pendo.clearSession();
       session.clearSession();
       navigate('/onboarding', { replace: true });
